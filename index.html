@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<title>Prekvapenie 🎁</title>
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  color: white;
+  text-align: center;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #ff7eb9, #ff758c);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+}
+@keyframes gradientBG {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+h1 {
+  font-size: 5em;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 10px 0;
+  cursor: pointer;
+}
+p {
+  font-size: 2.5em;
+  margin: 10px 0;
+}
+#countdown {
+  font-size: 3em;
+  margin: 20px 0;
+  min-height: 80px; 
+}
+#finalMessage {
+  opacity: 0;
+  transition: opacity 0.5s;
+  font-size: 2.5em;
+  margin-top: 20px;
+  min-height: 80px; 
+}
+#finalMessage.show {
+  opacity: 1;
+}
+.falling {
+  position: absolute;
+  font-size: 50px;
+  animation: fall linear infinite;
+}
+@keyframes fall {
+  0% {transform: translateY(-50px) rotate(0deg);}
+  100% {transform: translateY(100vh) rotate(360deg);}
+}
+#cake {
+  font-size: 8em;
+  margin: 20px 0;
+  cursor: pointer;
+}
+canvas {
+  position: fixed;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:-1;
+}
+</style>
+</head>
+<body>
+
+<h1 id="title">🎉 VŠETKO NAJLEPŠIE K NARODENINÁM, BOHYŇA! 😘</h1>
+<p id="introText">
+Uži si každý okamih tohto krásneho dňa 🌸.<br>
+Čaká na teba ešte jedno malé prekvapenie…<br>
+Vráť sa sem, keď časomiera ukáže nulu ⏳✨
+</p>
+
+<div id="countdown"></div>
+<div id="finalMessage">
+  🌟 Trpezlivosť ruže prináša..<br>
+  A teraz si otvor svoju e-mailovú schránku 📬<br>
+  Tam ťa čaká moje posledné prekvapenie ❤️
+</div>
+
+<div id="cake">🎂</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+// ODPOČÍTAVANIE
+const countdownEl = document.getElementById("countdown");
+const finalMessage = document.getElementById("finalMessage");
+const introText = document.getElementById("introText");
+
+// CIEĽOVÝ DATUM: 3.9.2025 23:59:59
+const targetDate = new Date(2025, 8, 3, 23, 59, 59).getTime(); // mesiac 8 = september
+
+const timer = setInterval(() => {
+  const now = new Date().getTime();
+  const distance = targetDate - now;
+
+  if(distance>0){
+    const days = Math.floor(distance/(1000*60*60*24));
+    const hours = Math.floor((distance%(1000*60*60*24))/(1000*60*60));
+    const minutes = Math.floor((distance%(1000*60*60))/(1000*60));
+    const seconds = Math.floor((distance%(1000*60))/1000);
+    countdownEl.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  } else {
+    clearInterval(timer);
+    countdownEl.style.display="none";
+    introText.style.display="none"; 
+    finalMessage.classList.add("show");
+    window.scrollTo(0,0); 
+    startEffects();
+  }
+},1000);
+
+// KONFETY + ❤️ + Srdiecka + Psíci
+const canvas = document.getElementById("confetti");
+const ctx = canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+const confettiCount=150;
+const confetti=[];
+const colors=["hsl(0,100%,50%)","hsl(50,100%,50%)","hsl(200,100%,50%)","hsl(330,100%,50%)","red"];
+for(let i=0;i<confettiCount;i++){
+  confetti.push({
+    x: Math.random()*canvas.width,
+    y: Math.random()*canvas.height,
+    r: Math.random()*6+2,
+    color: colors[Math.floor(Math.random()*colors.length)],
+    tilt: Math.random()*10,
+    tiltAngle: Math.random()*0.1
+  });
+}
+function drawConfetti(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  confetti.forEach(c=>{
+    ctx.fillStyle=c.color;
+    ctx.beginPath();
+    ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
+    ctx.fill();
+    c.y+=Math.cos(c.tiltAngle)+1;
+    c.x+=Math.sin(c.tiltAngle);
+    if(c.y>canvas.height) c.y=-10;
+  });
+  requestAnimationFrame(drawConfetti);
+}
+drawConfetti();
+
+// SPAWN FALLING ELEMENTS
+function spawnFalling(emoji){
+  const el = document.createElement("div");
+  el.className="falling";
+  el.innerText=emoji;
+  el.style.left=Math.random()*window.innerWidth+"px";
+  el.style.animationDuration=(4+Math.random()*4)+"s";
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),8000);
+}
+
+// SPAWN VŠETKÉHO
+function startEffects(){
+  setInterval(()=>spawnFalling("🐕"),300);
+  setInterval(()=>spawnFalling("🎂"),700);
+  const emojis=["🎈","🎉","🥳","✨","⭐","💫","❤️"];
+  setInterval(()=>spawnFalling(emojis[Math.floor(Math.random()*emojis.length)]),200);
+}
+
+// klik na H1 alebo tortu spúšťa efekty srdiečka
+document.getElementById("title").addEventListener("click", startEffects);
+document.getElementById("cake").addEventListener("click", startEffects);
+
+</script>
+
+</body>
+</html>
